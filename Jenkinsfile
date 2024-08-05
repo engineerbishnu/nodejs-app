@@ -2,7 +2,7 @@
 pipeline {
     agent any
     environment {
-        DOCKER_IMAGE = "engineer442/nodejs-app"
+        DOCKER_IMAGE = "nodejs-app"
         DOCKER_CREDENTIALS_ID = "dockerhub-credentials" // Replace with your Docker Hub credentials ID
         DOCKER_REGISTRY = "docker.io"
     }
