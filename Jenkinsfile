@@ -44,8 +44,8 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    // Replace the placeholder with the actual image tag
-                    sh "sed 's|${IMAGE_TAG}|${env.DOCKER_IMAGE}:${env.BUILD_ID}|g' kubernetes-deployment.yaml > k8s-deployment-updated.yaml"
+                    // Create a temporary file with the updated image tag
+                    sh "sed 's|IMAGE_TAG|${env.DOCKER_IMAGE}:${env.BUILD_ID}|g' kubernetes-deployment.yaml > k8s-deployment-updated.yaml"
                     kubeconfig(credentialsId: "${env.KUBE_CREDENTIALS_ID}", serverUrl: 'https://0.0.0.0:45685') {
                         sh 'kubectl apply -f k8s-deployment-updated.yaml'
                     }
