@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE = "nodejs-app"
         DOCKER_CREDENTIALS_ID = "dockerhub-credentials" // Replace with your Docker Hub credentials ID
-        DOCKER_REGISTRY = "docker.io"
+        DOCKER_REGISTRY = "hub.docker.com"
     }
     stages {
         stage('Checkout') {
