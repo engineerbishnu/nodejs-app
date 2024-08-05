@@ -32,7 +32,7 @@ pipeline {
                 script {
                   
                       kubeconfig(credentialsId: 'kubeconfig-id', serverUrl: 'https://0.0.0.0:45685') {
-                        sh 'kubectl apply -f kubernetes-deployment.yml'
+                        sh 'kubectl apply -f kubernetes-deployment.yaml'
                     }
                     
               
