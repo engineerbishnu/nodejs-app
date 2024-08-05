@@ -1,10 +1,9 @@
-
 pipeline {
     agent any
     environment {
-        DOCKER_IMAGE = "nodejs-app"
-        DOCKER_CREDENTIALS_ID = "dockerhub-credentials" // Replace with your Docker Hub credentials ID
-        DOCKER_REGISTRY = "hub.docker.com"
+        DOCKER_IMAGE = "engineer442/nodejs-app"
+        DOCKER_CREDENTIALS_ID = "dockerhub-credentials" // ID of your Docker Hub credentials in Jenkins
+        KUBE_CREDENTIALS_ID = "kubeconfig-id" // ID of your Kubernetes credentials in Jenkins
     }
     stages {
         stage('Checkout') {
@@ -15,13 +14,17 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    // Build Docker image
                     dockerImage = docker.build("${env.DOCKER_IMAGE}:${env.BUILD_ID}")
-                    
-                    // Tag and push Docker image
-                    docker.withRegistry("https://${env.DOCKER_REGISTRY}", "${env.DOCKER_CREDENTIALS_ID}") {
-                        dockerImage.push("${env.BUILD_ID}")
-                        dockerImage.push("latest")
+                }
+            }
+        }
+        stage('Push') {
+            steps {
+                script {
+                    withDockerRegistry([credentialsId: "${env.DOCKER_CREDENTIALS_ID}", url: 'https://index.docker.io/v2/']) {
+                        sh "docker tag ${env.DOCKER_IMAGE}:${env.BUILD_ID} ${env.DOCKER_IMAGE}:latest"
+                        sh "docker push ${env.DOCKER_IMAGE}:${env.BUILD_ID}"
+                        sh "docker push ${env.DOCKER_IMAGE}:latest"
                     }
                 }
             }
@@ -29,7 +32,6 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Run tests inside Docker container
                     dockerImage.inside {
                         // Set execute permissions for node_modules/.bin
                         sh 'chmod +x node_modules/.bin/mocha'
@@ -41,18 +43,11 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    // Deploy to Kubernetes
-                    kubeconfig(credentialsId: 'kubeconfig-id', serverUrl: 'https://0.0.0.0:45685') {
+                    kubeconfig(credentialsId: "${env.KUBE_CREDENTIALS_ID}", serverUrl: 'https://0.0.0.0:45685') {
                         sh 'kubectl apply -f kubernetes-deployment.yaml'
                     }
                 }
             }
         }
     }
-    post {
-        always {
-            cleanWs()
-        }
-    }
 }
-
